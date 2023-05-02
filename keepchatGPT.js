@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name              My KeepChatGPT
 // @description       Solving problmes: (1) NetworkError when attempting to fetch resource. (2) Something went wrong. If this issue persists please contact us through our help center at help.openai.com. (3) Conversation not found. (4) This content may violate our content policy.
-// @version           11.0
+// @version           11.1
 // @author            xcanwin
 // @namespace         https://github.com/xcanwin/KeepChatGPT/
 // @supportURL        https://github.com/xcanwin/KeepChatGPT/
-// @updateURL         https://raw.githubusercontent.com/xcanwin/KeepChatGPT/main/KeepChatGPT.user.js
-// @downloadURL       https://raw.githubusercontent.com/xcanwin/KeepChatGPT/main/KeepChatGPT.user.js
+// @updateURL         https://raw.githubusercontent.com/tuan-karma/My_KeepChatGPT/main/keepchatGPT.js
+// @downloadURL       https://raw.githubusercontent.com/tuan-karma/My_KeepChatGPT/main/keepchatGPT.js
 // @description:vi    ChatGPT Plugin trò chuyện. Giải quyết tất cả các lỗi, mang lại trải nghiệm AI của chúng tôi một cách cực: (1) NetworkError when attempting to fetch resource. (2) Something went wrong. If this issue persists please contact us through our help center at help.openai.com. (3) Conversation not found. (4) This content may violate our content policy.
 // @license           GPL-2.0-only
 // @match             https://chat.openai.com/*
@@ -29,17 +29,11 @@
     const getLang = function () {
         let lang =
         {
-            "index": { "暗色主题": "dm", "显示调试": "sd", "取消审计": "cm", "取消动画": "ca", "关于": "ab", "建议间隔30秒": "si", "调整间隔": "mi", "检查更新": "cu", "当前版本": "cv", "发现最新版": "dl", "已是最新版": "lv", "克隆对话": "cc" },
+            "index": { "dark_mode": "dm", "show_debug": "sd", "cancel_audit": "cm", "cancel_animation": "ca", "about": "ab", "suggest_interval_30s": "si", "modify_interval": "mi", "check_updates": "cu", "current_version": "cv", "discover_lastest_ver": "dl", "is_lastest_ver": "lv", "clone_conversation": "cc" },
             "local": {
                 "en": { "dm": "Dark mode", "sd": "Show debugging", "cm": "Cancel audit", "ca": "Cancel animation", "ab": "About", "si": "Suggest interval of 30 seconds; The author usually sets 150", "mi": "Modify interval", "cu": "Check for updates", "cv": "Current version", "dl": "Discover the latest version", "lv": "is the latest version", "cc": "Clone conversation" },
             }
         };
-        // lang = JSON.parse(lang);
-        for (let k in lang.local) {
-            if (k.length > 2 && !(k.slice(0, 2) in lang.local)) {
-                lang.local[k.slice(0, 2)] = lang.local[k];
-            }
-        }
         const nls = navigator.languages;
         let language = "zh-CN";
         for (let j = 0; j < nls.length; j++) {
@@ -194,12 +188,11 @@
         }
         const ndivmenu = document.createElement('div');
         ndivmenu.setAttribute("class", "kmenu");
-        ndivmenu.innerHTML = `<ul><li id=nmenuid_sd>${tl("显示调试")}</li><li id=nmenuid_dm>${tl("暗色主题")}</li><li id=nmenuid_ca>${tl("取消动画")}</li><li id=nmenuid_cm>${tl("取消审计")}</li><li id=nmenuid_af>${tl("调整间隔")}</li><li id=nmenuid_cc>${tl("克隆对话")}</li><li id=nmenuid_cu>${tl("检查更新")}</li><li id=nmenuid_ab>${tl("关于")}</li></ul>`;
+        ndivmenu.innerHTML = `<ul><li id=nmenuid_sd>${tl("show_debug")}</li><li id=nmenuid_dm>${tl("dark_mode")}</li><li id=nmenuid_cm>${tl("cancel_audit")}</li><li id=nmenuid_af>${tl("modify_interval")}</li><li id=nmenuid_cc>${tl("clone_conversation")}</li><li id=nmenuid_cu>${tl("check_updates")}</li><li id=nmenuid_ab>${tl("about")}</li></ul>`;
         document.body.appendChild(ndivmenu);
 
         $('#nmenuid_sd').appendChild(ncheckbox());
         $('#nmenuid_dm').appendChild(ncheckbox());
-        $('#nmenuid_ca').appendChild(ncheckbox());
         $('#nmenuid_cm').appendChild(ncheckbox());
         $('#nmenuid_cc').appendChild(ncheckbox());
 
@@ -227,11 +220,6 @@
             }
             $('.checkbutton', this).classList.toggle('checked');
         };
-        $('#nmenuid_ca').onclick = function () {
-            sv("k_cancelAnimation", !$('.checkbutton', this).classList.contains('checked'));
-            $('#kcg').classList.toggle('shine');
-            $('.checkbutton', this).classList.toggle('checked');
-        };
         $('#nmenuid_cm').onclick = function () {
             if ($('.checkbutton', this).classList.contains('checked')) {
                 byeModer(false);
@@ -244,7 +232,7 @@
         };
         $('#nmenuid_af').onclick = function () {
             toggleMenu('hide');
-            ndialog(`${tl("调整间隔")}`, `${tl("建议间隔30秒")}`, `Go`, function (t) {
+            ndialog(`${tl("modify_interval")}`, `${tl("suggest_interval_30s")}`, `Go`, function (t) {
                 try {
                     interval2Time = parseInt($(".kdialoginput", t).value);
                 } catch (e) {
@@ -328,8 +316,8 @@
             }
         };
         const icon = GM_info.script.icon ? GM_info.script.icon : `${GM_info.script.namespace}raw/main/assets/logo.svg`;
-        ndivkcg._symbol1_innerHTML = `ChatGPT PLUS`;
-        ndivkcg._symbol2_innerHTML = `Keep${ndivkcg.id.slice(1, 2).toUpperCase()}hatGPT`;
+        ndivkcg._symbol1_innerHTML = "GPT Plus";
+        ndivkcg._symbol2_innerHTML = "ChatGPT Plus";
 
         if ($(symbol1_class)) {
             ndivkcg.innerHTML = ndivkcg._symbol1_innerHTML;
@@ -436,13 +424,6 @@ nav {
             $('#kcg').style.marginRight = "inherit";
         }
 
-        if (gv("k_cancelAnimation", false) === true) {
-            $('#nmenuid_ca .checkbutton').classList.add('checked');
-            $('#kcg').classList.remove('shine');
-        } else {
-            $('#kcg').classList.add('shine');
-        }
-
         if (gv("k_closeModer", false) === true) {
             $('#nmenuid_cm .checkbutton').classList.add('checked');
             byeModer(true);
@@ -514,11 +495,11 @@ nav {
                 const m = data.match(/@version\s+(\S+)/);
                 const ltv = m && m[1];
                 if (ltv && verInt(ltv) > verInt(crv)) {
-                    ndialog(`${tl("检查更新")}`, `${tl("当前版本")}: ${crv}, ${tl("发现最新版")}: ${ltv}`, `UPDATE`, function (t) {
+                    ndialog(`${tl("check_updates")}`, `${tl("current_version")}: ${crv}, ${tl("discover_lastest_ver")}: ${ltv}`, `UPDATE`, function (t) {
                         window.open(updateURL, '_blank');
                     });
                 } else {
-                    ndialog(`${tl("检查更新")}`, `${tl("当前版本")}: ${crv}, ${tl("已是最新版")}`, `OK`);
+                    ndialog(`${tl("check_updates")}`, `${tl("current_version")}: ${crv}, ${tl("is_lastest_ver")}`, `OK`);
                 }
             });
         }).catch(e => console.log(e));
