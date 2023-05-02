@@ -3,8 +3,8 @@
 // @description       Solving problmes: (1) NetworkError when attempting to fetch resource. (2) Something went wrong. If this issue persists please contact us through our help center at help.openai.com. (3) Conversation not found. (4) This content may violate our content policy.
 // @version           11.1
 // @author            xcanwin
-// @namespace         https://github.com/xcanwin/KeepChatGPT/
-// @supportURL        https://github.com/xcanwin/KeepChatGPT/
+// @namespace         https://github.com/tuan-karma/My_KeepChatGPT
+// @supportURL        https://github.com/tuan-karma/My_KeepChatGPT
 // @updateURL         https://raw.githubusercontent.com/tuan-karma/My_KeepChatGPT/main/keepchatGPT.js
 // @downloadURL       https://raw.githubusercontent.com/tuan-karma/My_KeepChatGPT/main/keepchatGPT.js
 // @description:vi    ChatGPT Plugin trò chuyện. Giải quyết tất cả các lỗi, mang lại trải nghiệm AI của chúng tôi một cách cực: (1) NetworkError when attempting to fetch resource. (2) Something went wrong. If this issue persists please contact us through our help center at help.openai.com. (3) Conversation not found. (4) This content may violate our content policy.
@@ -29,9 +29,11 @@
     const getLang = function () {
         let lang =
         {
-            "index": { "dark_mode": "dm", "show_debug": "sd", "cancel_audit": "cm", "cancel_animation": "ca", "about": "ab", "suggest_interval_30s": "si", "modify_interval": "mi", "check_updates": "cu", "current_version": "cv", "discover_lastest_ver": "dl", "is_lastest_ver": "lv", "clone_conversation": "cc" },
+            "index": { "dark_mode": "dm", "show_debug": "sd", "cancel_audit": "cm", "cancel_animation": "ca", "about": "ab", "suggest_interval_30s": "si", "modify_interval": "mi", "check_updates": "cu", "current_version": "cv", "discover_lastest_ver": "dl", "is_lastest_ver": "lv", "clone_conversation": "cc", "clean_home": "ch" },
             "local": {
-                "en": { "dm": "Dark mode", "sd": "Show debugging", "cm": "Cancel audit", "ca": "Cancel animation", "ab": "About", "si": "Suggest interval of 30 seconds; The author usually sets 150", "mi": "Modify interval", "cu": "Check for updates", "cv": "Current version", "dl": "Discover the latest version", "lv": "is the latest version", "cc": "Clone conversation" },
+                "en": { "dm": "Dark mode", "sd": "Show debugging", "cm": "Cancel audit", "ca": "Cancel animation", "ab": "About", "si": "Suggest interval of 30 seconds; The author usually sets 150", "mi": "Modify interval", "cu": "Check for updates", "cv": "Current version", "dl": "Discover the latest version", "lv": "is the latest version", "cc": "Clone conversation", "ch": "Clean up the homepage" },
+                "vi": { "dm": "Chế độ tối", "sd": "Hiển thị gỡ lỗi", "cm": "Hủy đánh giá", "ca": "Hủy hoạt hình", "ab": "Về", "si": "Đề xuất khoảng thời gian 30 giây", "mi": "Sửa khoảng cách", "cu": "Kiểm tra cập nhật", "cc": "Sao chép cuộc trò chuyện", "ch": "Dọn dẹp trang chủ" },
+
             }
         };
         const nls = navigator.languages;
@@ -114,6 +116,7 @@
         }
     };
 
+    // The main function
     const keepChat = function () {
         fetch(u).then((response) => {
             response.text().then((data) => {
@@ -188,13 +191,24 @@
         }
         const ndivmenu = document.createElement('div');
         ndivmenu.setAttribute("class", "kmenu");
-        ndivmenu.innerHTML = `<ul><li id=nmenuid_sd>${tl("show_debug")}</li><li id=nmenuid_dm>${tl("dark_mode")}</li><li id=nmenuid_cm>${tl("cancel_audit")}</li><li id=nmenuid_af>${tl("modify_interval")}</li><li id=nmenuid_cc>${tl("clone_conversation")}</li><li id=nmenuid_cu>${tl("check_updates")}</li><li id=nmenuid_ab>${tl("about")}</li></ul>`;
+        ndivmenu.innerHTML = `
+<ul>
+    <li id=nmenuid_sd>${tl("show_debug")}</li>
+    <li id=nmenuid_dm>${tl("dark_mode")}</li>
+    <li id=nmenuid_cm>${tl("cancel_audit")}</li>
+    <li id=nmenuid_af>${tl("modify_interval")}</li>
+    <li id=nmenuid_cc>${tl("clone_conversation")}</li>
+    <li id=nmenuid_ch>${tl("clean_home")}</li>
+    <li id=nmenuid_cu>${tl("check_updates")}</li>
+    <li id=nmenuid_ab>${tl("about")}</li>
+</ul>`;
         document.body.appendChild(ndivmenu);
 
         $('#nmenuid_sd').appendChild(ncheckbox());
         $('#nmenuid_dm').appendChild(ncheckbox());
         $('#nmenuid_cm').appendChild(ncheckbox());
         $('#nmenuid_cc').appendChild(ncheckbox());
+        $('#nmenuid_ch').appendChild(ncheckbox());
 
         $('#nmenuid_sd').onclick = function () {
             if ($('.checkbutton', this).classList.contains('checked')) {
@@ -252,6 +266,15 @@
                 sv("k_clonechat", false);
             } else {
                 sv("k_clonechat", true);
+            }
+            $('.checkbutton', this).classList.toggle('checked');
+        };
+        $('#nmenuid_ch').onclick = function () {
+            toggleMenu('hide');
+            if ($('.checkbutton', this).classList.contains('checked')) {
+                sv("k_cleanlyhome", false);
+            } else {
+                sv("k_cleanlyhome", true);
             }
             $('.checkbutton', this).classList.toggle('checked');
         };
@@ -434,6 +457,10 @@ nav {
         if (gv("k_clonechat", false) === true) {
             $('#nmenuid_cc .checkbutton').classList.add('checked');
         }
+
+        if (gv("k_cleanlyhome", false) === true) {
+            $('#nmenuid_ch .checkbutton').classList.add('checked');
+        }
     };
 
     let byeModer = function (action) {
@@ -530,11 +557,25 @@ nav {
         });
     };
 
+    const cleanlyHome = function () {
+        if (location.href.match(/https:\/\/chat\.openai\.com\/\??/) && gv("k_cleanlyhome", false) === true) {
+            if ($("main h1") && $("main h1").parentElement.childNodes[1]) {
+                $("main h1").parentElement.childNodes[1].remove();
+                const nSpan = document.createElement('span');
+                nSpan.className = 'rounded-md bg-yellow-200 py-0.5 px-1.5 text-xs font-medium uppercase text-gray-800';
+                nSpan.style = 'font-size: 38%';
+                nSpan.textContent = 'Plus';
+                $("main h1").appendChild(nSpan);
+            }
+        }
+    };
+
     const nInterval1Fun = function () {
         if ($(symbol1_class) || $(symbol2_class)) {
             loadKCG();
             cloneChat();
             tempFixOpenAI();
+            cleanlyHome();
         }
     };
 
